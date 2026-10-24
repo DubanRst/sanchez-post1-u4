@@ -1,6 +1,7 @@
 package com.universidad.compras.ejecucion;
 
 import com.universidad.compras.modelo.Solicitud;
+import com.universidad.compras.notificacion.PublicadorCambioEstado;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -16,13 +17,20 @@ public class EjecutorSolicitud {
     private final Solicitud solicitud;
     private final PresupuestoService presupuesto;
     private final OrdenCompraService ordenes;
+    private final PublicadorCambioEstado publicador;
     private final Deque<Comando> pendientesDeDeshacer = new ArrayDeque<>();
     private final List<String> historial = new ArrayList<>();
 
     public EjecutorSolicitud(Solicitud solicitud, PresupuestoService presupuesto, OrdenCompraService ordenes) {
+        this(solicitud, presupuesto, ordenes, new PublicadorCambioEstado(List.of()));
+    }
+
+    public EjecutorSolicitud(Solicitud solicitud, PresupuestoService presupuesto,
+                             OrdenCompraService ordenes, PublicadorCambioEstado publicador) {
         this.solicitud = solicitud;
         this.presupuesto = presupuesto;
         this.ordenes = ordenes;
+        this.publicador = publicador;
     }
 
     public void reservarPresupuesto() {
@@ -63,6 +71,6 @@ public class EjecutorSolicitud {
     }
 
     private void cambiarEstado(String nuevoEstado) {
-        solicitud.setEstado(nuevoEstado);
+        publicador.cambiarEstado(solicitud, nuevoEstado);
     }
 }
